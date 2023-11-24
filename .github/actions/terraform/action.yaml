@@ -1,0 +1,16 @@
+name: Deploy with Terraform
+
+runs:
+  using: composite
+  steps:
+    - name: Terraform Init
+      run: terraform init
+      shell: bash
+
+    - name: Terraform Format
+      run: terraform fmt -check
+      shell: bash
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      shell: bash

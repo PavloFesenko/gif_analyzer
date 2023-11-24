@@ -1,0 +1,25 @@
+name: gif_test
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - terraform
+  - pip:
+    - --extra-index-url https://pypi.nvidia.com
+    - ipykernel
+    - pandas
+    - scikit-learn
+    - seaborn
+    - uvicorn[standard]
+    - tensorflow[and-cuda]>=2.15
+    - tf2onnx<1.15
+    - dagshub
+    - mlflow
+    - boto3
+    - pytest
+    - ruff
+    - mypy
+    - pre-commit
+    - -r lambda_function/layers/api/requirements.txt
+    - -r lambda_function/layers/core/requirements.txt

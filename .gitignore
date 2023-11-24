@@ -1,0 +1,13 @@
+.pytest_cache/
+.ruff_cache/
+.terraform/
+.vscode/
+builds/
+data/
+events/
+layers/model/*.onnx
+models/
+__pycache__/
+.env
+.terraform.lock.hcl
+tmp.gif

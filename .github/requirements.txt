@@ -1,0 +1,6 @@
+pytest
+boto3
+requests
+numpy
+mlflow
+onnx

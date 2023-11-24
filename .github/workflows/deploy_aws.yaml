@@ -1,0 +1,77 @@
+name: Deploy to AWS
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/**
+      - layers/**
+      - scripts/**
+      - tests/**
+      - main.tf
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  PROJECT: ${{ github.event.repository.name }}
+  MLFLOW_TRACKING_USERNAME: ${{ github.repository_owner }}
+  MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_API_TOKEN }}
+
+jobs:
+  deploy_aws:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install requirements
+      run: pip install -r .github/requirements.txt
+
+    - name: Run unit tests
+      run: pytest --ignore=tests/test_app.py
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::109073231566:role/github_actions_role
+        aws-region: eu-west-3
+    
+    - name: Load the challenger model
+      run: python -c "import mlflow_utils; mlflow_utils.load_challenger_model()"
+      working-directory: ./scripts
+    
+    - name: Deploy to staging
+      uses: ./.github/actions/terraform
+      env:
+        TF_WORKSPACE: ${{ format('{0}_stage', env.PROJECT) }}
+        TF_VAR_project: ${{ env.PROJECT }}
+        TF_VAR_env: stage
+
+    - name: Run integration tests
+      run: pytest tests/test_app.py --lambda_name ${PROJECT}_stage
+
+    - name: Deploy to production
+      uses: ./.github/actions/terraform
+      env:
+        TF_WORKSPACE: ${{ format('{0}_prod', env.PROJECT) }}
+        TF_VAR_project: ${{ env.PROJECT }}
+        TF_VAR_env: prod
+
+    - name: Promote the challenger model
+      run: python -c "import mlflow_utils; mlflow_utils.promote_challenger_model()"
+      working-directory: ./scripts
+    
