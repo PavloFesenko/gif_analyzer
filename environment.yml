@@ -1,4 +1,4 @@
-name: gif_test
+name: gif_analyzer
 channels:
   - conda-forge
 dependencies:
@@ -12,8 +12,8 @@ dependencies:
     - scikit-learn
     - seaborn
     - uvicorn[standard]
-    - tensorflow[and-cuda]>=2.15
-    - tf2onnx<1.15
+    - tensorflow[and-cuda]==2.15.0
+    - tf2onnx==1.15.1
     - dagshub
     - mlflow
     - boto3
@@ -21,5 +21,5 @@ dependencies:
     - ruff
     - mypy
     - pre-commit
-    - -r lambda_function/layers/api/requirements.txt
-    - -r lambda_function/layers/core/requirements.txt
+    - -r layers/api/requirements.txt
+    - -r layers/core/requirements.txt
